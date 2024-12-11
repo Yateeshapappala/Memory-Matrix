@@ -2,13 +2,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.card');
     const confettiContainer = document.getElementById('confetti-container');
     const playAgainBtn = document.getElementById('play-again');
-    playAgainBtn.addEventListener('click', () => window.location.reload());
+    const timerElement = document.getElementById('timer');
+    const congratulationsElement = document.getElementById('congratulations');
+    playAgainBtn.addEventListener('click', resetGame);
 
-    let hasFlippedCard = false; 
+    let hasFlippedCard = false;
     let firstCard, secondCard;
     let lockBoard = false;
     let matchesFound = 0;
     const totalPairs = 8;
+
+    let timerInterval;
+    let secondsElapsed = 0;
+    let timerStarted = false;
+
+    // Start the timer
+    function startTimer() {
+        secondsElapsed = 0;
+        timerElement.textContent = formatTime(secondsElapsed);
+        timerInterval = setInterval(() => {
+            secondsElapsed++;
+            timerElement.textContent = formatTime(secondsElapsed);
+        }, 1000);
+    }
+
+    // Stop the timer
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    // Format time as mm:ss
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secondsLeft = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secondsLeft.toString().padStart(2, '0')}`;
+    }
+
+    // Shuffle cards at the start
+    function shuffle() {
+        cards.forEach(card => {
+            let randomPos = Math.floor(Math.random() * 16);
+            card.style.order = randomPos;
+        });
+    }
+    shuffle();
 
     // Add an event listener to each card
     cards.forEach(card => {
@@ -16,7 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function flipCard() {
-        if (lockBoard || this === firstCard) return; 
+        if (!timerStarted) {
+            timerStarted = true;
+            startTimer(); // Start the timer when the first card is clicked
+        }
+
+        if (lockBoard || this === firstCard) return;
 
         this.classList.add('flipped');
 
@@ -29,14 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function shuffle() {
-        cards.forEach(card => {
-            let randomPos = Math.floor(Math.random() * 16);
-            card.style.order = randomPos;
-        });
-    }
-    shuffle();
-
     function checkForMatch() {
         let isMatch = firstCard.dataset.image === secondCard.dataset.image;
         isMatch ? disableCards() : unflipCards();
@@ -48,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             firstCard.classList.remove('flipped');
             secondCard.classList.remove('flipped');
             resetBoard();
-        }, 1000);
+        }, 400);
     }
 
     function disableCards() {
@@ -56,7 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
         secondCard.classList.add('matched');
         matchesFound++;
 
-        if (matchesFound === totalPairs) showConfetti();
+        if (matchesFound === totalPairs) {
+            stopTimer();
+            showConfetti();
+        }
 
         resetBoard();
     }
@@ -71,41 +108,42 @@ document.addEventListener('DOMContentLoaded', () => {
             const confetti = document.createElement('div');
             confetti.classList.add('confetti');
 
-            // Random size
             const sizeClass = ['small', 'medium', 'large'][Math.floor(Math.random() * 3)];
             confetti.classList.add(sizeClass);
 
-            // Random shape - add 'circle' only if needed
             if (Math.random() > 0.5) {
                 confetti.classList.add('circle');
             }
 
-            // Random color
             const confettiColors = ['#FFC107', '#2196F3', '#FF5722', '#4CAF50', '#E91E63'];
             confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-
-            // Random horizontal position
             confetti.style.left = `${Math.random() * 100}vw`;
-
-            // Random animation delay
             confetti.style.animationDelay = `${Math.random() * 2}s`;
 
             confettiContainer.appendChild(confetti);
 
-            // Remove confetti after animation ends
             confetti.addEventListener('animationend', () => confetti.remove());
         }
 
-        // Generate multiple confetti pieces
         for (let i = 0; i < 1000; i++) {
             createConfettiPiece();
         }
     }
 
-    // Show confetti on win
     function showConfetti() {
-        startConfetti(); // Call the confetti animation
-        playAgainBtn.style.display = 'block'; // Show the play again button
-        document.getElementById('congratulations').style.display = 'block'; // Show the congratulations message
+        startConfetti();
+        playAgainBtn.style.display = 'block';
+        congratulationsElement.style.display = 'block';
+    }
+
+    // Reset the game
+    function resetGame() {
+        stopTimer();
+        timerStarted = false;
+        matchesFound = 0;
+        cards.forEach(card => card.classList.remove('flipped', 'matched'));
+        congratulationsElement.style.display = 'none';
+        playAgainBtn.style.display = 'none';
+        shuffle();
     }
 });

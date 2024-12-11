@@ -173,3 +173,9 @@ p a {
     opacity: 0;
     transition: opacity 0.5s ease;
 }
+#timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: center;
+}
