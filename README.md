@@ -4,13 +4,13 @@
 
 ## 🚀 Features
 
-- 🧩 4x4 interactive grid
-- ⏱️ Real-time game timer
-- 🎉 Confetti celebration when completed
-- 🔁 "Play Again" button to restart anytime
-- 🎨 Clean, responsive UI
+- 4x4 interactive grid
+- Real-time game timer
+- Confetti celebration when completed
+- "Play Again" button to restart anytime
+- Clean, responsive UI
 
-## 🎮 How to Play
+## How to Play
 
 1. Click two cards to flip and reveal the images.
 2. If they match, they remain visible.
